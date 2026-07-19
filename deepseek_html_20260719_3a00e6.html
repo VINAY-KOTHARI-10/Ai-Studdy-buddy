@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
+    <title>AI Study Buddy · Akshat</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e6ecf5 0%, #d5dde8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        /* --- Phone Frame --- */
+        .phone {
+            max-width: 420px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.70);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 56px;
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            padding: 20px 18px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.2s;
+        }
+
+        /* --- Status Bar --- */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a2637;
+            padding: 0 4px 16px 4px;
+            letter-spacing: 0.2px;
+        }
+        .status-icons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            color: #1a2637;
+        }
+
+        /* --- Screens --- */
+        .screen {
+            display: none;
+            animation: fadeSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .screen.active {
+            display: block;
+        }
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0.4;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Bottom Nav --- */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 4px 2px;
+            margin-top: 18px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: #7b8799;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 2px;
+            background: transparent;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 30px;
+            letter-spacing: 0.3px;
+        }
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 1px;
+            transition: 0.2s;
+        }
+        .nav-item.active {
+            color: #0b2b4a;
+            background: rgba(11, 43, 74, 0.08);
+        }
+        .nav-item.active i {
+            color: #0b2b4a;
+        }
+        .nav-item:hover {
+            background: rgba(11, 43, 74, 0.05);
+        }
+
+        /* --- Common Components --- */
+        .chip-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 14px 0;
+        }
+        .chip {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1f2a3e;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+        .chip.active {
+            background: #0b2b4a;
+            color: #ffffff;
+            border-color: #0b2b4a;
+            box-shadow: 0 6px 16px rgba(11, 43, 74, 0.18);
+        }
+        .chip:hover {
+            transform: translateY(-1px);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 18px 20px;
+            margin: 14px 0;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: 0.15s;
+        }
+        .card-glass {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+
+        .badge {
+            background: rgba(11, 43, 74, 0.08);
+            color: #0b2b4a;
+            padding: 5px 16px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s ease;
+            border: 1px solid transparent;
+        }
+        .badge:hover {
+            background: rgba(11, 43, 74, 0.14);
+            transform: scale(0.96);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0b2b4a, #2d5f8a);
+            border-radius: 20px;
+            width: 72%;
+            transition: width 0.5s ease;
+        }
+
+        .btn-primary {
+            background: #0b2b4a;
+            border: none;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 24px rgba(11, 43, 74, 0.20);
+            width: 100%;
+            letter-spacing: 0.3px;
+        }
+        .btn-primary:hover {
+            background: #1a3d60;
+            transform: scale(0.97);
+            box-shadow: 0 6px 20px rgba(11, 43, 74, 0.25);
+        }
+        .btn-primary:active {
+            transform: scale(0.94);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid rgba(11, 43, 74, 0.20);
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            color: #0b2b4a;
+        }
+        .btn-outline:hover {
+            background: rgba(11, 43, 74, 0.06);
+            border-color: #0b2b4a;
+        }
+
+        .flex {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .text-muted {
+            color: #5f6e82;
+        }
+        .text-small {
+            font-size: 13px;
+        }
+
+        /* --- Login --- */
+        .login-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 36px;
+            padding: 32px 24px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.06);
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .login-card input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 60px;
+            font-size: 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            transition: 0.2s;
+        }
+        .login-card input:focus {
+            outline: none;
+            border-color: #0b2b4a;
+            box-shadow: 0 0 0 4px rgba(11, 43, 74, 0.08);
+        }
+
+        /* --- Feature Grid --- */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+            margin: 16px 0;
+        }
+        .feature-item {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(6px);
+            border-radius: 24px;
+            padding: 16px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+        .feature-item i {
+            font-size: 26px;
+            color: #0b2b4a;
+            margin-bottom: 4px;
+            transition: 0.2s;
+        }
+        .feature-item span {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #1f2a3e;
+        }
+        .feature-item:hover {
+            border-color: #0b2b4a;
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(11, 43, 74, 0.08);
+        }
+        .feature-item:active {
+            transform: scale(0.94);
+        }
+
+        /* --- Badge Row (quick access) --- */
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0 4px;
+        }
+        .badge-row .badge {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            padding: 6px 18px;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .badge-row .badge:hover {
+            background: rgba(11, 43, 74, 0.08);
+        }
+
+        /* --- Leaderboard --- */
+        .leader-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+        .leader-item:last-child {
+            border-bottom: none;
+        }
+        .leader-item .rank {
+            font-weight: 700;
+            color: #0b2b4a;
+            min-width: 32px;
+        }
+
+        /* --- Flashcards --- */
+        .flashcard {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(242, 247, 255, 0.8));
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 28px 20px;
+            text-align: center;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .flashcard:hover {
+            transform: scale(0.98);
+            box-shadow: 0 8px 28px rgba(11, 43, 74, 0.06);
+        }
+        .flashcard:active {
+            transform: scale(0.94);
+        }
+
+        /* --- Stats Grid --- */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 18px 14px;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-item .num {
+            font-weight: 700;
+            font-size: 24px;
+            color: #0b2b4a;
+        }
+        .stat-item .label {
+            font-size: 12px;
+            color: #5f6e82;
+        }
+
+        /* --- Profile Avatar --- */
+        .profile-header {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .avatar {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(145deg, #0b2b4a, #1d4a74);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 32px;
+            box-shadow: 0 8px 24px rgba(11, 43, 74, 0.20);
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 420px) {
+            .phone {
+                padding: 14px 12px 8px;
+                border-radius: 40px;
+            }
+            .feature-grid {
+                gap: 10px;
+            }
+            .feature-item {
+                padding: 12px 4px;
+            }
+            .feature-item i {
+                font-size: 22px;
+            }
+            .badge-row .badge {
+                font-size: 11px;
+                padding: 4px 14px;
+            }
+            .stat-grid {
+                padding: 14px 10px;
+            }
+            .stat-item .num {
+                font-size: 20px;
+            }
+        }
+        @media (max-width: 360px) {
+            .feature-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .bottom-nav .nav-item {
+                padding: 4px 8px;
+                font-size: 9px;
+            }
+            .bottom-nav .nav-item i {
+                font-size: 17px;
+            }
+        }
+
+        /* --- Scrollbar hide --- */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone" id="app">
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-three-quarters"></i>
+            </div>
+        </div>
+
+        <!-- ====== LOGIN SCREEN ====== -->
+        <div id="screen-login" class="screen active">
+            <div style="text-align: center; padding: 16px 0 6px;">
+                <div style="background: rgba(11,43,74,0.06); width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+                    <i class="fas fa-graduation-cap" style="font-size: 44px; color: #0b2b4a;"></i>
+                </div>
+                <h1 style="font-size: 30px; font-weight: 800; color: #0b2b4a; letter-spacing: -0.5px;">AI Study Buddy</h1>
+                <p class="text-muted" style="font-weight: 400;">Plan · Learn · Achieve</p>
+            </div>
+            <div class="login-card">
+                <input type="text" placeholder="📧 Email or username" value="akshat@study.com" />
+                <input type="password" placeholder="🔒 Password" value="password123" />
+                <button class="btn-primary" onclick="navigateTo('dashboard')">
+                    <i class="fas fa-sign-in-alt"></i> Login as Akshat
+                </button>
+                <p style="text-align: center; margin-top: 14px; font-size: 14px; color: #5f6e82;">Demo: tap Login to explore</p>
+                <div style="display: flex; gap: 14px; margin-top: 12px; justify-content: center;">
+                    <span class="badge" style="background: rgba(0,0,0,0.04);">Sign up</span>
+                    <span class="badge" style="background: rgba(0,0,0,0.04);">Forgot?</span>
+                </div>
+            </div>
+            <div style="font-size: 12px; color: #8a9aa8; text-align: center; margin-top: 4px;">v3.0 · all features interactive</div>
+        </div>
+
+        <!-- ====== DASHBOARD ====== -->
+        <div id="screen-dashboard" class="screen">
+            <div class="flex-between">
+                <h2 style="font-weight: 700; color: #0b2b4a;"><i class="fas fa-home" style="color: #0b2b4a;"></i> Dashboard</h2>
+                <span class="badge" onclick="navigateTo('login')"><i class="fas fa-sign-out-alt"></i> Logout</span>
+            </div>
+            <div class="card" style="background: linear-gradient(145deg, rgba(11,43,74,0.06), rgba(255,255,255,0.5)); border: none;">
+                <div class="flex">
+                    <i class="fas fa-user-graduate" style="font-size: 32px; color: #0b2b4a;"></i>
+                    <div>
+                        <strong style="font-size: 18px;">Welcome back, Akshat!</strong><br>
+                        <span class="text-muted">Keep up the momentum 🔥</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Grid -->
+            <div class="feature-grid">
+                <div class="feature-item" onclick="navigateTo('chat')"><i class="fas fa-robot"></i><span>AI Chat</span></div>
+                <div class="feature-item" onclick="navigateTo('notes')"><i class="fas fa-sticky-note"></i><span>Notes</span></div>
+                <div class="feature-item" onclick="navigateTo('quiz')"><i class="fas fa-puzzle-piece"></i><span>Quiz Gen</span></div>
+                <div class="feature-item" onclick="navigateTo('flashcards')"><i class="fas fa-layer-group"></i><span>Flashcards</span></div>
+                <div class="feature-item" onclick="navigateTo('progress')"><i class="fas fa-chart-line"></i><span>Progress</span></div>
+                <div class="feature-item" onclick="navigateTo('leaderboard')"><i class="fas fa-trophy"></i><span>Leaderboard</span></div>
+                <div class="feature-item" onclick="navigateTo('calendar')"><i class="fas fa-calendar-alt"></i><span>Calendar</span></div>
+                <div class="feature-item" onclick="navigateTo('pomodoro')"><i class="fas fa-clock"></i><span>Pomodoro</span></div>
+                <div class="feature-item" onclick="navigateTo('profile')"><i class="fas fa-user"></i><span>Profile</span></div>
+            </div>
+
+            <div class="card">
+                <div class="flex-between">
+                    <span class="flex"><i class="fas fa-bolt" style="color: #0b2b4a;"></i> <strong>Today's progress</strong></span>
+                    <span class="badge">+8%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 68%;"></div></div>
+                <div class="flex-between text-small"><span>3.4 hrs studied</span><span>goal: 5 hrs</span></div>
+            </div>
+        </div>
+
+        <!-- ====== AI CHAT ====== -->
+        <div id="screen-chat" class="screen">
+            <div class="flex-between">
+                <h2 style="color: #0b2b4a;"><i class="fas fa-robot" style="color:#0b2b4a;"></i> AI Chat</h2>
+                <span class="badge" onclick="navigateTo('dashboard')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="card" style="min-height: 210px; background: rgba(245, 249, 255, 0.7);">
+                <p><strong>AI:</strong> Hello Akshat! How can I help you study today? 🤖</p>
+                <p style="margin-top: 14px;"><strong>You:</strong> Explain gradient descent.</p>
+                <p><strong>AI:</strong> Gradient descent is an optimization algorithm used to minimize a function by iteratively moving in the direction of steepest descent...</p>
+            </div>
+            <div class="flex" style="gap: 10px; margin-top: 4px;">
+                <input type="text" placeholder="Ask anything..." style="flex:1; padding:14px 20px; border-radius:60px; border:1px solid rgba(0,0,0,0.06); background:rgba(255,255,255,0.7); backdrop-filter:blur(4px);" />
+                <button class="btn-primary" style="width:auto; padding:14px 24px;" onclick="alert('AI would respond here!')"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- ====== NOTES ====== -->
+        <div id="screen-notes" class="screen">
+            <div class="flex-between">
+                <h2 style="color: #0b2b4a;"><i class="fas fa-sticky-note"></i> Notes</h2>
+                <span class="badge" onclick="navigateTo('dashboard')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="card"><strong>📝 Linear Algebra</strong><br><span class="text-muted">Updated 2h ago</span></div>
+            <div class="card"><strong>📝 Neural Networks</strong><br><span class="text-muted">Updated yesterday</span></div>
+            <div class="card"><strong>📝 Python Cheatsheet</strong><br><span class="text-muted">5 pages</span></div>
+            <button class="btn-primary" onclick="alert('New note created!')"><i class="fas fa-plus"></i> Add Note</button>
+        </div>
+
+        <!-- ====== QUIZ GENERATOR ====== -->
+        <div id="screen-quiz" class="screen">
+            <div class="flex-between">
+                <h2 style="color: #0b2b4a;"><i class="fas fa-puzzle-piece"></i> Quiz Gen</h2>
+                <span class="badge" onclick="navigateTo('dashboard')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="card">
+                <strong>📘 ML Basics</strong><br><span class="text-muted">10 questions · 15 min</span>
+                <button class="btn-outline" style="margin-top:10px;" onclick="alert('Quiz started!')">Start Quiz</button>
+            </div>
+            <div class="card">
+                <strong>📊 Data Science</strong><br><span class="text-muted">8 questions · 12 min</span>
+                <button class="btn-outline" style="margin-top:10px;" onclick="alert('Quiz started!')">Start Quiz</button>
+            </div>
+            <button class="btn-primary" onclick="alert('Generating new quiz...')"><i class="fas fa-plus"></i> Generate Quiz</button>
+        </div>
+
+        <!-- ====== FLASHCARDS ====== -->
+        <div id="screen-flashcards" class="screen">
+            <div class="flex-between">
+                <h2 style="color: #0b2b4a;"><i class="fas fa-layer-group"></i> Flashcards</h2>
+                <span class="badge" onclick="navigateTo('dashboard')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="flashcard" onclick="alert('Flip! Answer: Backpropagation')">
+                <strong style="font-size: 18px;">Q: What is backpropagation?</strong>
+                <span class="text-muted" style="margin-top:10px;">(tap to flip)</span>
+            </div>
+            <div class="flashcard" style="margin-top:12px; background:linear-gradient(145deg, rgba(237,244,255,0.8), rgba(255,255,255,0.6));" onclick="alert('Flip! Answer: 3.4')">
+                <strong style="font-size: 18px;">Q: What is the derivative of x²?</strong>
+            </div>
+            <button class="btn-primary" style="margin-top:14px;" onclick="alert('New flashcard set created!')"><i class="fas fa-plus"></i> Add Set</button>
+        </div>
+
+        <!-- ====== PROGRESS ====== -->
+        <div id="screen-progress" class="screen">
+            <div class="flex-between">
+                <h2 style="color: #0b2b4a;"><i class="fas fa-chart-line"></i> Progress</h2>
+                <span class="badge" onclick="navigateTo('dashboard')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-item"><span class="num">68%</span><div class="label">Overall</div></div>
+                <div class="stat-item"><span class="num">12</span><div class="label">Topics</div></div>
+                <div class="stat-item"><span class="num">8</span><div class="label">Quizzes</div></div>
+            </div>
+            <div class="card">
+                <strong>📈 Weekly activity</strong>
+                <div class="progress-bar"><div class="progress-fill" style="width:45%;"></div></div>
+                <span class="text-muted">4.5 hrs this week</span>
+            </div>
+        </div>
+
+        <!-- ====== LEADERBOARD ====== -->
+        <div id="screen-leaderboard" class="screen">
+            <div class="flex-between">
+                <h2 style="color: #0b2b4a;"><i class="fas fa-trophy" style="color:#f5b342;"></i> Leaderboard</h2>
+                <span class="badge" onclick="navigateTo('dashboard')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="card" style="padding: 12px 16px;">
+                <div class="leader-item"><span class="rank">🥇</span> <strong>Priya</strong> <span class="badge" style="margin-left:auto;">2,450 XP</span></div>
+                <div class="leader-item"><span class="rank">🥈</span> <strong>Rahul</strong> <span class="badge" style="margin-left:auto;">2,120 XP</span></div>
+                <div class="leader-item"><span class="rank">🥉</span> <strong>Akshat</strong> <span class="badge" style="margin-left:auto;">1,890 XP</span></div>
+                <div class="leader-item"><span class="rank">4</span> <strong>Ananya</strong> <span class="badge" style="margin-left:auto;">1,670 XP</span></div>
+            </div>
+            <button class="btn-outline" onclick="alert('Refreshing leaderboard...')"><i class="fas fa-sync"></i> Refresh</button>
+        </div>
+
+        <!-- ====== CALENDAR ====== -->
+        <div id="screen-calendar" class="screen">
+            <div class="flex-between">
+                <h2 style="color: #0b2b4a;"><i class="fas fa-calendar-alt"></i> Calendar</h2>
+                <span class="badge" onclick="navigateTo('dashboard')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="card">
+                <strong>📅 September 2026</strong>
+                <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:12px; text-align:center; font-weight:500;">
+                    <span style="color:#5f6e82;">M</span><span style="color:#5f6e82;">T</span><span style="color:#5f6e82;">W</span><span style="color:#5f6e82;">T</span><span style="color:#5f6e82;">F</span><span style="color:#5f6e82;">S</span><span style="color:#5f6e82;">S</span>
+                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+                    <span style="background:#0b2b4a; color:#fff; border-radius:40px; padding:4px 0;">8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span>
+                </div>
+                <div style="margin-top:14px;"><span class="badge" style="background:rgba(11,43,74,0.10);">📘 ML exam · 15 Sep</span></div>
+            </div>
+        </div>
+
+        <!-- ====== POMODORO ====== -->
+        <div id="screen-pomodoro" class="screen">
+            <div class="flex-between">
+                <h2 style="color: #0b2b4a;"><i class="fas fa-clock"></i> Pomodoro</h2>
+                <span class="badge" onclick="navigateTo('dashboard')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="card" style="text-align:center; padding:34px 20px;">
+                <div style="font-size:72px; font-weight:700; color:#0b2b4a; letter-spacing:2px;">25:00</div>
+                <div class="flex" style="justify-content:center; gap:14px; margin-top:16px;">
+                    <button class="btn-primary" style="width:auto; padding:14px 32px;" onclick="alert('Timer started!')"><i class="fas fa-play"></i></button>
+                    <button class="btn-outline" style="width:auto; padding:14px 32px;" onclick="alert('Timer reset')"><i class="fas fa-redo"></i></button>
+                </div>
+                <div class="chip-group" style="justify-content:center; margin-top:12px;">
+                    <span class="chip active">25 min</span>
+                    <span class="chip">5 min break</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== PROFILE ====== -->
+        <div id="screen-profile" class="screen">
+            <div class="flex-between">
+                <h2 style="color: #0b2b4a;"><i class="fas fa-user"></i> Profile</h2>
+                <span class="badge" onclick="navigateTo('dashboard')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="profile-header">
+                <div class="avatar">A</div>
+                <div>
+                    <strong style="font-size:22px;">Akshat</strong><br>
+                    <span class="text-muted">akshat@study.com</span>
+                </div>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-item"><span class="num">7</span><div class="label">Courses</div></div>
+                <div class="stat-item"><span class="num">11</span><div class="label">Certs</div></div>
+                <div class="stat-item"><span class="num">42</span><div class="label">Days</div></div>
+            </div>
+            <div class="card">
+                <strong>⚙️ Settings</strong>
+                <div class="flex-between" style="margin-top:8px;"><span>Notifications</span> <span><i class="fas fa-toggle-on" style="color:#0b2b4a; font-size:22px;"></i></span></div>
+                <div class="flex-between"><span>Theme</span> <span>Light</span></div>
+                <div class="flex-between"><span>Language</span> <span>English</span></div>
+            </div>
+            <button class="btn-outline" onclick="navigateTo('login')"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+
+        <!-- ====== BOTTOM NAV ====== -->
+        <div class="bottom-nav">
+            <button class="nav-item" data-screen="dashboard"><i class="fas fa-home"></i><span>Home</span></button>
+            <button class="nav-item" data-screen="chat"><i class="fas fa-robot"></i><span>Chat</span></button>
+            <button class="nav-item" data-screen="notes"><i class="fas fa-sticky-note"></i><span>Notes</span></button>
+            <button class="nav-item" data-screen="quiz"><i class="fas fa-puzzle-piece"></i><span>Quiz</span></button>
+            <button class="nav-item" data-screen="profile"><i class="fas fa-user"></i><span>Profile</span></button>
+        </div>
+
+        <!-- ====== QUICK ACCESS BADGES ====== -->
+        <div class="badge-row">
+            <span class="badge" onclick="navigateTo('flashcards')"><i class="fas fa-layer-group"></i> Flashcards</span>
+            <span class="badge" onclick="navigateTo('progress')"><i class="fas fa-chart-line"></i> Progress</span>
+            <span class="badge" onclick="navigateTo('leaderboard')"><i class="fas fa-trophy"></i> Leaderboard</span>
+            <span class="badge" onclick="navigateTo('calendar')"><i class="fas fa-calendar-alt"></i> Calendar</span>
+            <span class="badge" onclick="navigateTo('pomodoro')"><i class="fas fa-clock"></i> Pomodoro</span>
+        </div>
+        <div style="font-size: 11px; color: #8a9aa8; text-align: center; margin-top: 10px; letter-spacing: 0.3px;">
+            ✦ all features live · tap to explore ✦
+        </div>
+    </div>
+
+    <script>
+        // Navigation function
+        function navigateTo(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById('screen-' + screenId);
+            if (target) target.classList.add('active');
+
+            // Update bottom nav active state
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.screen === screenId) btn.classList.add('active');
+            });
+
+            // Scroll to top of phone
+            document.querySelector('.phone').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Bottom nav click listeners
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const screen = this.dataset.screen;
+                if (screen) navigateTo(screen);
+            });
+        });
+
+        // Chip toggle (Pomodoro, etc.)
+        document.querySelectorAll('.chip-group .chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                const parent = this.closest('.chip-group');
+                parent.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Auto-show login on load
+        // (login is already active by default)
+    </script>
+
+</body>
+</html>
